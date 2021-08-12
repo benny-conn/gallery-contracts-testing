@@ -83,7 +83,7 @@ export const getCurrentWalletConnected = async () => {
   }
 }
 
-export async function mintNFT(tokenID) {
+export async function mintNFT(tokenID, amount) {
   if (tokenID.trim() === "") {
     return {
       success: false,
@@ -95,7 +95,8 @@ export async function mintNFT(tokenID) {
 
   const method = window.contract.methods.mint(
     window.ethereum.selectedAddress,
-    Number(tokenID)
+    tokenID,
+    amount
   )
 
   const gas = await method.estimateGas({
@@ -133,17 +134,19 @@ export async function mintNFT(tokenID) {
   }
 }
 
-export async function mintNFTbatch(amount, offset) {
+export async function mintToMany(amount, offset) {
   let ids = []
   let addrs = []
+  let amounts = []
   for (let i = offset; i < amount + offset; i++) {
     ids.push(web3.utils.toBN(i))
     addrs.push("0x9a3f9764B21adAF3C6fDf6f947e6D3340a3F8AC5")
+    amounts.push(web3.utils.toBN(1))
   }
 
   window.contract = new web3.eth.Contract(contractABI.abi, contractAddress)
 
-  const method = window.contract.methods.mintBatch(addrs, ids)
+  const method = window.contract.methods.mintToMany(addrs, ids, amounts)
 
   const gas = await method.estimateGas({
     from: window.ethereum.selectedAddress,
@@ -180,7 +183,7 @@ export async function mintNFTbatch(amount, offset) {
   }
 }
 
-export async function safeTransferToken(tokenId, toAddr) {
+export async function safeTransferToken(tokenId, toAddr, amount) {
   if (tokenId.trim() === "" || toAddr.trim() === "") {
     return {
       success: false,
@@ -190,61 +193,13 @@ export async function safeTransferToken(tokenId, toAddr) {
   }
   window.contract = new web3.eth.Contract(contractABI.abi, contractAddress)
 
+  console.log("YES", tokenId, amount)
   const method = window.contract.methods.safeTransferFrom(
     window.ethereum.selectedAddress,
     toAddr,
-    Number(tokenId)
-  )
-
-  const gas = await method.estimateGas({
-    from: window.ethereum.selectedAddress,
-  })
-
-  const gasPrice = await web3.eth.getGasPrice()
-
-  const encodedABI = method.encodeABI()
-
-  const transactionParameters = {
-    to: contractAddress,
-    from: window.ethereum.selectedAddress,
-    gas: "0x" + gas.toString(16),
-    gasPrice: "0x" + gasPrice.toString(16),
-    data: encodedABI,
-  }
-
-  try {
-    const txHash = await window.ethereum.request({
-      method: "eth_sendTransaction",
-      params: [transactionParameters],
-    })
-    return {
-      success: true,
-      status:
-        "✅ Check out your transaction on Etherscan: https://ropsten.etherscan.io/tx/" +
-        txHash,
-    }
-  } catch (error) {
-    return {
-      success: false,
-      status: "😥 Something went wrong: " + error.message,
-    }
-  }
-}
-
-export async function transferToken(tokenId, toAddr) {
-  if (tokenId.trim() === "" || toAddr.trim() === "") {
-    return {
-      success: false,
-      status:
-        "❗Please make sure all fields are completed before transferring.",
-    }
-  }
-  window.contract = new web3.eth.Contract(contractABI.abi, contractAddress)
-
-  const method = window.contract.methods.transferFrom(
-    window.ethereum.selectedAddress,
-    toAddr,
-    Number(tokenId)
+    tokenId,
+    amount,
+    web3.utils.asciiToHex("0")
   )
 
   const gas = await method.estimateGas({
@@ -291,7 +246,7 @@ export async function redeem(tokenId) {
   }
   window.contract = new web3.eth.Contract(contractABI.abi, contractAddress)
 
-  const method = window.contract.methods.redeem(Number(tokenId))
+  const method = window.contract.methods.redeem(tokenId)
 
   const gas = await method.estimateGas({
     from: window.ethereum.selectedAddress,

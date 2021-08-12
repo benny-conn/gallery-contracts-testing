@@ -3,10 +3,9 @@ import {
   connectWallet,
   getCurrentWalletConnected,
   mintNFT,
-  mintNFTbatch,
+  mintToMany,
   redeem,
   safeTransferToken,
-  transferToken,
 } from "./util/interact.js"
 
 const Minter = props => {
@@ -15,6 +14,7 @@ const Minter = props => {
   const [tokenID, setTokenID] = useState("")
   const [toAddr, setToAddr] = useState("")
   const [tokensToMint, setTokensToMint] = useState("")
+  const [amount, setAmount] = useState("")
 
   useEffect(() => {
     async function doit() {
@@ -67,7 +67,7 @@ const Minter = props => {
   }
 
   const onMintPressed = async () => {
-    const { success, status } = await mintNFT(tokenID)
+    const { success, status } = await mintNFT(tokenID, amount)
     setStatus(status)
   }
   const onRedeemPressed = async () => {
@@ -76,20 +76,15 @@ const Minter = props => {
   }
 
   const onSafeTransferPressed = async () => {
-    const { success, status } = await safeTransferToken(tokenID, toAddr)
+    const { success, status } = await safeTransferToken(tokenID, toAddr, amount)
     setStatus(status)
   }
 
-  const onTransferPressed = async () => {
-    const { success, status } = await transferToken(tokenID, toAddr)
-    setStatus(status)
-  }
-
-  const onMintBatchPressed = async () => {
+  const onMintManyPressed = async () => {
     const howManyTokens = Number(tokensToMint)
     const curId = Number(tokenID)
 
-    const { success, status } = await mintNFTbatch(howManyTokens, curId)
+    const { success, status } = await mintToMany(howManyTokens, curId)
     setStatus(status)
   }
 
@@ -122,7 +117,13 @@ const Minter = props => {
           placeholder="e.g. 0xl29ijso92jals92aAls92..."
           onChange={event => setToAddr(event.target.value)}
         />
-        <h2>Tokens To Mint Batch: (comma sepparated) </h2>
+        <h2>Amount for Single Mint: </h2>
+        <input
+          type="text"
+          placeholder="e.g. 3"
+          onChange={event => setAmount(event.target.value)}
+        />
+        <h2>Amount to Mint Many: </h2>
         <input
           type="text"
           placeholder="e.g. 300"
@@ -135,14 +136,11 @@ const Minter = props => {
       <button id="mintButton" onClick={onRedeemPressed}>
         Redeem NFT
       </button>
-      <button id="mintButton" onClick={onMintBatchPressed}>
-        Mint Batch NFTs
+      <button id="mintButton" onClick={onMintManyPressed}>
+        Mint NFTs To Many
       </button>
       <button id="mintButton" onClick={onSafeTransferPressed}>
         Safe Transfer NFT
-      </button>
-      <button id="mintButton" onClick={onTransferPressed}>
-        Transfer NFT
       </button>
       <p id="status" style={{ color: "red" }}>
         {status}
