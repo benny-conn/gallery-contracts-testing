@@ -83,7 +83,7 @@ export const getCurrentWalletConnected = async () => {
   }
 }
 
-export async function mintNFT(tokenID, amount) {
+export async function mintNFT(tokenID) {
   if (tokenID.trim() === "") {
     return {
       success: false,
@@ -95,8 +95,7 @@ export async function mintNFT(tokenID, amount) {
 
   const method = window.contract.methods.mint(
     window.ethereum.selectedAddress,
-    tokenID,
-    amount
+    tokenID
   )
 
   const gas = await method.estimateGas({
@@ -137,16 +136,14 @@ export async function mintNFT(tokenID, amount) {
 export async function mintToMany(amount, offset) {
   let ids = []
   let addrs = []
-  let amounts = []
   for (let i = offset; i < amount + offset; i++) {
     ids.push(web3.utils.toBN(i))
     addrs.push("0x9a3f9764B21adAF3C6fDf6f947e6D3340a3F8AC5")
-    amounts.push(web3.utils.toBN(1))
   }
 
   window.contract = new web3.eth.Contract(contractABI.abi, contractAddress)
 
-  const method = window.contract.methods.mintToMany(addrs, ids, amounts)
+  const method = window.contract.methods.mintBatch(addrs, ids)
 
   const gas = await method.estimateGas({
     from: window.ethereum.selectedAddress,
@@ -197,9 +194,7 @@ export async function safeTransferToken(tokenId, toAddr, amount) {
   const method = window.contract.methods.safeTransferFrom(
     window.ethereum.selectedAddress,
     toAddr,
-    tokenId,
-    amount,
-    web3.utils.asciiToHex("0")
+    tokenId
   )
 
   const gas = await method.estimateGas({

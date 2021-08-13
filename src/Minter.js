@@ -14,7 +14,6 @@ const Minter = props => {
   const [tokenID, setTokenID] = useState("")
   const [toAddr, setToAddr] = useState("")
   const [tokensToMint, setTokensToMint] = useState("")
-  const [amount, setAmount] = useState("")
 
   useEffect(() => {
     async function doit() {
@@ -67,7 +66,7 @@ const Minter = props => {
   }
 
   const onMintPressed = async () => {
-    const { success, status } = await mintNFT(tokenID, amount)
+    const { success, status } = await mintNFT(tokenID)
     setStatus(status)
   }
   const onRedeemPressed = async () => {
@@ -76,7 +75,7 @@ const Minter = props => {
   }
 
   const onSafeTransferPressed = async () => {
-    const { success, status } = await safeTransferToken(tokenID, toAddr, amount)
+    const { success, status } = await safeTransferToken(tokenID, toAddr)
     setStatus(status)
   }
 
@@ -116,12 +115,6 @@ const Minter = props => {
           type="text"
           placeholder="e.g. 0xl29ijso92jals92aAls92..."
           onChange={event => setToAddr(event.target.value)}
-        />
-        <h2>Amount for Single Mint: </h2>
-        <input
-          type="text"
-          placeholder="e.g. 3"
-          onChange={event => setAmount(event.target.value)}
         />
         <h2>Amount to Mint Many: </h2>
         <input
